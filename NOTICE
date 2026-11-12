@@ -1,0 +1,17 @@
+Invest Hub
+Copyright 2026 alexalim (https://github.com/alexalim)
+
+This product includes software developed by alexalim.
+Source: https://github.com/alexalim/invest-hub
+
+If you redistribute this software or a work based on it, in source or
+binary form, you must keep this NOTICE file (or its contents) with your
+distribution and state that your work is based on Invest Hub by alexalim,
+as required by section 4 of the Apache License, Version 2.0.
+
+Third-party software used by this project (installed separately, not bundled
+in this repository):
+  - TradingView Lightweight Charts (Apache-2.0) https://github.com/tradingview/lightweight-charts
+    Copyright (c) 2025 TradingView, Inc. https://www.tradingview.com/
+  - Vue, Vue Router, Vite (MIT)
+  - FastAPI, Uvicorn, HTTPX (MIT / BSD-3-Clause), NumPy (BSD-3-Clause)

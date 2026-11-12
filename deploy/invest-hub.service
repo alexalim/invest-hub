@@ -1,0 +1,18 @@
+# systemd 사용자 서비스: 로그인하지 않아도 PC가 켜지면 자동 실행
+# 설치:  mkdir -p ~/.config/systemd/user && cp deploy/invest-hub.service ~/.config/systemd/user/
+#        systemctl --user daemon-reload && systemctl --user enable --now invest-hub
+#        sudo loginctl enable-linger $USER     # 로그아웃 상태에서도 계속 실행하려면
+[Unit]
+Description=Invest Hub (personal trading + startup investment DB)
+After=network-online.target
+
+[Service]
+# 아래 세 줄의 경로를 이 저장소를 내려받은 위치와 node·uv가 설치된 위치로 바꿔 주세요
+WorkingDirectory=%h/invest-hub
+ExecStart=%h/invest-hub/run.sh
+Restart=on-failure
+RestartSec=10
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,10 @@
+data/
+.venv/
+node_modules/
+frontend/dist/
+__pycache__/
+.env
+*.pem
+*.key
+*credentials*
+kis*.json
