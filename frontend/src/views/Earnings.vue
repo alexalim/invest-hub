@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="page-h"><div><h1>미국 실적 일정</h1><div class="muted small">앞으로 6거래일 동안 실적을 발표하는 미국 종목입니다. 날짜마다 시가총액이 큰 순서로 최대 40개를 보여줍니다.</div></div></div>
-    <div v-if="!d" class="spinner" />
+    <Loading v-if="!d" />
     <div v-else-if="!d.days.length" class="card empty">일정을 받지 못했습니다. 잠시 뒤 다시 열어 주세요.</div>
     <div v-else class="col" style="gap:12px">
       <div v-for="day in d.days" :key="day.date" class="card flush">

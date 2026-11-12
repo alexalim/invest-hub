@@ -28,7 +28,7 @@
         <button :class="side" :disabled="busy || !qty" @click="submit">{{ side === 'buy' ? '매수' : '매도' }} 주문</button>
       </div>
     </template>
-    <div v-else class="spinner" />
+    <Loading v-else />
   </div>
 </template>
 

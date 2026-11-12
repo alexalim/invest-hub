@@ -3,7 +3,7 @@
     <router-link :to="`/market/groups/${route.params.kind}`" class="small link">← {{ route.params.kind === 'industry' ? '업종' : '테마' }} 목록</router-link>
     <div class="page-h" style="margin-top:6px" v-if="d"><div><h1>{{ d.info?.name }}</h1>
       <div class="small"><span :class="cls(d.info?.change_pct)">{{ pct(d.info?.change_pct) }}</span> · {{ d.stocks.length }}종목</div></div></div>
-    <div class="card flush"><div v-if="!d" class="spinner" style="margin:16px" /><QuoteTable v-else :rows="live" :columns="['price','change_pct','value','mcap','per','pbr']" /></div>
+    <div class="card flush"><Loading v-if="!d" /><QuoteTable v-else :rows="live" :columns="['price','change_pct','value','mcap','per','pbr']" /></div>
   </div>
 </template>
 <script setup>

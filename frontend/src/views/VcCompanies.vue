@@ -11,7 +11,7 @@
       <select aria-label="정렬" v-model="f.sort"><option value="recent">최근 투자순</option><option value="raised">누적 유치순</option><option value="deals">투자 횟수순</option><option value="name">이름순</option></select>
       <button class="sm" @click="saveSmart">이 조건을 스마트 컬렉션으로</button>
     </div></div>
-    <div class="card flush"><div v-if="!d" class="spinner" style="margin:16px" />
+    <div class="card flush"><Loading v-if="!d" />
       <div v-else class="scroll-x"><table class="t">
         <thead><tr><th></th><th>기업</th><th>분야</th><th>최근 단계</th><th class="num">누적 유치</th><th class="num">투자 횟수</th><th class="num">기업가치</th><th>최근 투자</th></tr></thead>
         <tbody><tr v-for="c in d.rows" :key="c.id" class="click" @click="$router.push('/vc/companies/' + c.id)">

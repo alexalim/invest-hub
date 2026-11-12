@@ -2,7 +2,7 @@
   <div>
     <div class="page-h"><div><h1>특징종목</h1><div class="muted small">급등·급락, 거래량 급증, 52주 신고가·신저가</div></div>
       <div class="seg"><button v-for="m in MK" :key="m[0]" :class="{ on: mk === m[0] }" @click="mk = m[0]">{{ m[1] }}</button></div></div>
-    <div v-if="!d" class="spinner" />
+    <Loading v-if="!d" />
     <div v-else class="grid g2">
       <div class="card flush" v-for="s in SECTIONS" :key="s.key">
         <div style="padding:12px 12px 0"><h3>{{ s.label }}</h3><div class="tiny faint" v-if="s.hint">{{ s.hint }}</div></div>

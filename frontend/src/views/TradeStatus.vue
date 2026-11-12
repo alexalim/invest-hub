@@ -7,7 +7,7 @@
         <button class="sm" @click="reset">초기화</button>
         <button class="sm danger" v-if="accounts.length > 1" @click="removeAcc">삭제</button>
       </div></div>
-    <div v-if="!acc" class="spinner" />
+    <Loading v-if="!acc" />
     <template v-else>
       <div class="grid g4">
         <div class="card stat"><span class="k">총 평가액</span><span class="v">{{ won(acc.equity) }}원</span><span class="tiny faint">시작 {{ won(acc.initial) }}원</span></div>

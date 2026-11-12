@@ -82,7 +82,7 @@
         <!-- 재무 -->
         <div v-else-if="tab === 'finance'" class="card">
           <div class="card-h"><h3>재무정보</h3><div class="seg"><button :class="{ on: finPeriod === 'annual' }" @click="finPeriod = 'annual'">연간</button><button :class="{ on: finPeriod === 'quarter' }" @click="finPeriod = 'quarter'">분기</button></div></div>
-          <div v-if="!fin" class="spinner" />
+          <Loading v-if="!fin" />
           <div v-else-if="!fin.rows.length" class="empty">재무 자료가 없는 종목입니다</div>
           <template v-else>
             <div class="small faint" style="margin-bottom:6px">{{ fin.unit || (cur === 'KRW' ? '단위: 억원, %, 배' : '') }} · 음영 열은 증권사 추정치</div>
@@ -107,7 +107,7 @@
         <!-- 뉴스·공시·리포트 -->
         <div v-else-if="tab === 'news'" class="card">
           <div class="seg" style="margin-bottom:10px"><button v-for="k in [['news','뉴스'],['disclosures','공시'],['research','리포트']]" :key="k[0]" :class="{ on: newsTab === k[0] }" @click="newsTab = k[0]">{{ k[1] }} {{ news ? `(${news[k[0]].length})` : '' }}</button></div>
-          <div v-if="!news" class="spinner" />
+          <Loading v-if="!news" />
           <div v-else-if="!news[newsTab].length" class="empty">항목이 없습니다</div>
           <a v-for="n in news?.[newsTab] || []" :key="n.url" :href="n.url" target="_blank" rel="noopener" class="list-item" style="display:block">
             <div style="font-weight:600">{{ n.title }}</div>
@@ -143,7 +143,7 @@
             </div>
             <div class="card">
               <h3>이 종목의 매매신호 과거 성과</h3>
-              <div v-if="!sigs" class="spinner" />
+              <Loading v-if="!sigs" />
               <div class="scroll-x" v-else><table class="t">
                 <thead><tr><th>전략</th><th class="num">발생</th><th class="num">5일 평균</th><th class="num">10일 평균</th><th class="num">20일 평균</th><th class="num">20일 적중률</th><th class="num">지금</th></tr></thead>
                 <tbody><tr v-for="s in sigs" :key="s.strategy"><td><span class="chip" :class="s.side === 'buy' ? 'red' : 'bluedown'">{{ s.side === 'buy' ? '매수' : '매도' }}</span> {{ s.name }}</td>
@@ -195,7 +195,7 @@
         <div v-else-if="tab === 'similar'" class="card">
           <div class="card-h"><h3>지금 이 종목과 차트가 닮은 종목</h3>
             <div class="seg"><button v-for="w in [30, 60, 120]" :key="w" :class="{ on: win === w }" @click="win = w">최근 {{ w }}일</button></div></div>
-          <div v-if="!sim" class="spinner" />
+          <Loading v-if="!sim" />
           <div v-else-if="!sim.length" class="empty">결과가 없습니다</div>
           <div class="grid g3">
             <router-link v-for="s in sim" :key="s.symbol" :to="'/stock/' + s.symbol" class="card" style="padding:10px">
@@ -235,7 +235,7 @@
     <AlertModal v-if="alertOpen" :symbol="symbol" :name="inst.name" :price="q.price" @close="alertOpen = false" />
   </div>
   <div v-else-if="err" class="empty">{{ err }}</div>
-  <div v-else class="spinner" />
+  <Loading v-else />
 </template>
 
 <script setup>

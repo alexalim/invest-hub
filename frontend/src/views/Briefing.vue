@@ -2,10 +2,10 @@
   <div>
     <div class="page-h"><div><h1>아침 브리핑</h1><div class="muted small">밤사이 미국 시장과 지금 선물, 어제 한국 수급을 한 장으로 모았습니다. 사람이 쓴 해설이 아니라 숫자를 규칙대로 문장으로 옮긴 것입니다.</div></div>
       <button class="sm" :disabled="busy" @click="load">{{ busy ? '불러오는 중…' : '새로 고침' }}</button></div>
-    <div v-if="!d" class="spinner" />
+    <Loading v-if="!d" />
     <template v-else>
       <div class="card">
-        <h3>한눈에 보기 <span class="small muted">{{ datetime(d.at) }} 기준</span></h3>
+        <h3>한눈에 보기 <span class="small muted">{{ mdhm(d.at) }} 기준</span></h3>
         <ul class="lines"><li v-for="(l, i) in d.lines" :key="i">{{ l }}</li></ul>
       </div>
       <div v-for="g in GROUPS" :key="g[0]" style="margin-top:14px">
@@ -32,7 +32,7 @@
         <div class="card">
           <div class="card-h"><h3>수급·심리</h3><router-link to="/market/flow" class="link small">수급 자세히</router-link></div>
           <table class="t"><thead><tr><th>시장</th><th class="num">외국인</th><th class="num">기관</th><th class="num">개인</th></tr></thead>
-            <tbody><tr v-for="(f, mk) in d.flows" :key="mk"><td>{{ mk === 'KOSPI' ? '코스피' : '코스닥' }} <span class="tiny faint">{{ +f.date.slice(4, 6) }}/{{ +f.date.slice(6) }}</span></td>
+            <tbody><tr v-for="(f, mk) in d.flows" :key="mk"><td>{{ mk === 'KOSPI' ? '코스피' : '코스닥' }} <span class="tiny faint">{{ md(f.date) }}</span></td>
               <td class="num" :class="cls(f.foreigner)">{{ signed(f.foreigner) }}</td><td class="num" :class="cls(f.institution)">{{ signed(f.institution) }}</td>
               <td class="num" :class="cls(f.individual)">{{ signed(f.individual) }}</td></tr></tbody></table>
           <div class="row wrap" style="margin-top:10px;gap:14px">
@@ -53,7 +53,7 @@
 import { ref } from 'vue'
 import QuoteTable from '../components/QuoteTable.vue'
 import { api } from '../lib/api'
-import { cls, datetime, macro, pct, signed } from '../lib/fmt'
+import { cls, macro, md, mdhm, pct, signed } from '../lib/fmt'
 const GROUPS = [['us_index', '미국 증시 (마감)'], ['futures', '지금 선물 · 한국 ETF'], ['rates', '금리 · 환율 · 원자재'], ['asia', '한국 · 아시아']]
 const MOVERS = [['up', '미국 대형주 상승 상위'], ['down', '미국 대형주 하락 상위']]
 const SECTORS = [['sectors', '미국 강한 업종'], ['sectors_weak', '미국 약한 업종']]
@@ -63,6 +63,4 @@ load()
 </script>
 <style scoped>
 .lines { margin: 6px 0 0 18px; padding: 0; line-height: 1.8; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
-.tile { padding: 10px 12px; } .tile .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
 </style>

@@ -3,7 +3,7 @@
     <div class="page-h"><div><h1>스타트업 투자 통계</h1>
       <div class="muted small">투자 유치 기사에서 자동으로 뽑은 국내 라운드 집계입니다. 정부 통계(투자기관 집행 실적)와 정의가 달라 직접 비교할 수 없고, 자동 추출이라 일부 금액은 기업가치를 투자금으로 잘못 읽었거나 같은 라운드가 두 번 잡혔을 수 있습니다.</div></div>
       <div class="seg"><button v-for="m in [3, 6, 12, 24]" :key="m" :class="{ on: months === m }" @click="months = m">{{ m }}개월</button></div></div>
-    <div v-if="!s" class="spinner" />
+    <Loading v-if="!s" />
     <template v-else>
       <div class="grid g4">
         <div class="card stat"><span class="k">투자 건수</span><span class="v">{{ num(s.total.n) }}건</span><span class="tiny faint">금액 비공개 {{ num(s.total.undisclosed) }}건 포함</span></div>

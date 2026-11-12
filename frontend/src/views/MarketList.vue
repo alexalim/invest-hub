@@ -6,7 +6,7 @@
         <select aria-label="종목 종류" v-if="mk === 'KOSPI'" v-model="kind" @change="page = 1"><option value="stock">주식</option><option value="etf">ETF</option><option value="etn">ETN</option></select>
       </div></div>
     <div class="card flush">
-      <div v-if="!d" class="spinner" style="margin:16px" />
+      <Loading v-if="!d" />
       <QuoteTable v-else :rows="live" :columns="cols" rank :offset="(page - 1) * 50" sortable @sort="setSort" />
     </div>
     <div class="row" style="margin-top:10px;justify-content:center" v-if="d">

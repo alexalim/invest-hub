@@ -25,6 +25,13 @@ CATS = [
     ("dividend", "배당", ("배당",)),
     ("deal", "합병·분할·인수", ("합병", "분할", "영업양수", "영업양도", "타법인주식", "공개매수")),
     ("warning", "거래정지·관리", ("매매거래정지", "관리종목", "상장폐지", "불성실공시", "투자주의", "투자경고", "투자위험", "횡령", "배임")),
+    ("major", "주요 경영사항", ("투자판단관련주요경영사항", "주요사항보고서", "최대주주변경", "소송", "회생절차", "영업정지")),
+    ("guarantee", "담보·보증", ("담보제공", "채무보증", "금전대여")),
+    ("option", "스톡옵션", ("주식매수선택권",)),
+    ("meeting", "주주총회", ("주주총회", "의결권대리행사", "주주명부폐쇄")),
+    ("ir", "기업설명회", ("기업설명회",)),
+    ("related", "계열사 거래", ("동일인등출자계열회사", "대규모기업집단", "특수관계인", "대규모내부거래")),
+    ("issue", "증권 발행 서류", ("증권발행실적보고서", "증권발행결과", "일괄신고", "투자설명서", "증권신고서", "자산유동화")),
     ("report", "정기보고서", ("분기보고서", "반기보고서", "사업보고서")),
 ]
 CAT_NAMES = {k: n for k, n, _ in CATS} | {"etc": "기타"}
@@ -116,7 +123,7 @@ def disclosure_view(cat: str = "", q: str = "", page: int = 1, size: int = 50, m
     if cat and cat in CAT_NAMES:
         where.append("d.cat=?"); params.append(cat)
     elif not cat:
-        where.append("d.cat<>'report'")   # 기본 화면에서는 건수만 많은 정기보고서를 뺀다
+        where.append("d.cat NOT IN ('report','issue')")   # 기본 화면에서는 건수만 많은 정기보고서·증권 발행 서류를 뺀다
     if q.strip():
         where.append("(d.corp LIKE ? OR d.title LIKE ?)"); params += [f"%{q.strip()}%"] * 2
     if mine is not None:

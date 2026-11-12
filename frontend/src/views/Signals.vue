@@ -20,7 +20,7 @@
     </div>
     <div class="card flush">
       <div style="padding:12px 12px 0" class="row between"><h3>최근 3거래일 신호 {{ d ? `(${d.rows.length})` : '' }}</h3><span class="tiny faint">이 종목에서 같은 신호가 났을 때의 이후 20일 성과</span></div>
-      <div v-if="!d" class="spinner" style="margin:16px" />
+      <Loading v-if="!d" />
       <div v-else class="scroll-x"><table class="t">
         <thead><tr><th>신호일</th><th>종목</th><th>전략</th><th class="num">신호가</th><th class="num">현재가</th><th class="num">이후</th><th class="num">이 종목 과거 발생</th><th class="num" title="검증상 다음 성과를 예측하지 못함">20일 평균 (참고)</th><th class="num" title="검증상 다음 성과를 예측하지 못함">20일 적중률 (참고)</th></tr></thead>
         <tbody>

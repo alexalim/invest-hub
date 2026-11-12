@@ -11,7 +11,7 @@
         <button class="primary" :disabled="!f.body.trim()" @click="submit">올리기</button>
       </div>
     </div>
-    <div v-if="!posts" class="spinner" />
+    <Loading v-if="!posts" />
     <div v-else-if="!posts.length" class="empty">아직 글이 없습니다</div>
     <div v-for="p in posts" :key="p.id" class="list-item">
       <div class="row between"><div class="row"><b>{{ p.nickname }}</b><span class="tiny faint">{{ ago(p.created_at) }}</span></div>

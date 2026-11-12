@@ -12,7 +12,7 @@
       <select aria-label="지역" v-model="f.region"><option value="kr">국내</option><option value="global">해외</option><option value="all">전체</option></select>
       <select aria-label="정렬" v-model="f.sort"><option value="date">최신순</option><option value="amount">금액순</option></select>
     </div></div>
-    <div class="card flush"><div v-if="!d" class="spinner" style="margin:16px" /><DealTable v-else :rows="d.rows" admin @fix="fix" /></div>
+    <div class="card flush"><Loading v-if="!d" /><DealTable v-else :rows="d.rows" admin @fix="fix" /></div>
     <Pager v-model="page" :total="d?.total || 0" />
     <div class="tiny faint" style="margin-top:8px">기사 제목·본문에서 규칙으로 뽑은 자료라 틀릴 수 있습니다. 관리자는 각 행에서 해외 표시·삭제로 바로잡을 수 있습니다.</div>
   </div>

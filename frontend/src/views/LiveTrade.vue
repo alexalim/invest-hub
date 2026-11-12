@@ -106,7 +106,7 @@
     </Modal>
   </div>
   <div v-else-if="denied" class="empty">관리자만 쓸 수 있는 화면입니다.</div>
-  <div v-else class="spinner" />
+  <Loading v-else />
 </template>
 
 <script setup>

@@ -2,7 +2,7 @@
   <div>
     <div class="page-h"><div><h1>매매일지</h1><div class="muted small">체결 내역마다 이유와 느낌을 남기고, 직접 일지를 쓸 수도 있습니다.</div></div>
       <button class="primary" @click="edit({})">+ 일지 쓰기</button></div>
-    <div v-if="!d" class="spinner" />
+    <Loading v-if="!d" />
     <template v-else>
       <div class="grid g4">
         <div class="card stat"><span class="k">체결 · 청산</span><span class="v">{{ d.stats.trades }} · {{ d.stats.closed }}</span></div>

@@ -63,6 +63,17 @@ export function datetime(ts) {
   const d = new Date(ts * 1000)
   return `${date(ts)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
+// 'YYYYMMDD' → '11/12'
+export function md(s) { return s ? `${+s.slice(4, 6)}/${+s.slice(6, 8)}` : '' }
+// 초 단위 시각 또는 'HHMM' → '14:05'
+export function hm(t) {
+  if (!t) return ''
+  if (typeof t === 'string') return t.slice(0, 2) + ':' + t.slice(2, 4)
+  const d = new Date(t * 1000)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+// 초 단위 시각 → '11/12 14:05' (화면의 '기준 시각' 표기는 이 꼴로 통일)
+export function mdhm(ts) { if (!ts) return ''; const d = new Date(ts * 1000); return `${d.getMonth() + 1}/${d.getDate()} ${hm(ts)}` }
 // 일봉 차트 시각(UTC 자정 기준)을 날짜 문자열로
 export function barDate(ts) { const d = new Date(ts * 1000); return d.toISOString().slice(0, 10) }
 export function ago(ts) {

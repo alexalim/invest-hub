@@ -33,7 +33,7 @@ p { margin: 0 0 8px; }
 @media (max-width: 700px) { .g2, .g3 { grid-template-columns: 1fr; } .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stat .v { font-size: 17px; } }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); min-width: 0; }
 .card.flush { padding: 0; overflow-x: auto; overflow-y: hidden; }
-.card-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.card-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 .card-h h2, .card-h h3 { margin: 0; }
 .page-h { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .stat { display: flex; flex-direction: column; gap: 2px; }
@@ -73,6 +73,14 @@ table.t tr.click:hover td { background: var(--panel-2); cursor: pointer; }
 .bar-bg { height: 6px; background: var(--panel-2); border-radius: 3px; overflow: hidden; } .bar-fg { height: 100%; background: var(--accent); }
 .spinner { width: 18px; height: 18px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.tile { padding: 10px 12px; text-align: left; } .tile .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile.sel { border-color: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 8px; }
+.lg { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap; } .lg b { font-variant-numeric: tabular-nums; }
+label.lg { cursor: pointer; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+@media (max-width: 700px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-h { align-items: flex-start; } }
 .modal-back { position: fixed; inset: 0; background: rgba(0, 0, 0, .4); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
 .modal { background: var(--panel); border-radius: 12px; padding: 18px; width: min(560px, 100%); max-height: 90vh; overflow: auto; border: 1px solid var(--line); }
 .toasts { position: fixed; right: 16px; bottom: 16px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }

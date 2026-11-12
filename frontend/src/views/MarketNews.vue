@@ -3,7 +3,7 @@
     <div class="page-h"><div><h1>시장 뉴스</h1><div class="muted small">증시 주요 뉴스</div></div>
       <div class="seg"><button v-for="c in CATS" :key="c[0]" :class="{ on: cat === c[0] }" @click="cat = c[0]">{{ c[1] }}</button></div></div>
     <div class="card">
-      <div v-if="!items" class="spinner" />
+      <Loading v-if="!items" />
       <div v-else-if="!items.length" class="empty">뉴스가 없습니다</div>
       <a v-for="n in items" :key="n.url" :href="n.url" target="_blank" rel="noopener" class="list-item row" style="align-items:flex-start;gap:12px">
         <img v-if="n.image" :src="n.image" alt="" class="thumb" loading="lazy" referrerpolicy="no-referrer" />

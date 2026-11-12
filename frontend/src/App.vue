@@ -10,7 +10,10 @@
       <nav @click="navOpen = false">
         <div class="group mine">
           <div class="gt">내 메뉴</div>
-          <div v-if="!favItems.length" class="tiny faint" style="padding:2px 10px 6px">메뉴 오른쪽 ☆를 누르면 여기 모입니다</div>
+          <template v-if="!favItems.length">
+            <div v-for="m in frequent" :key="'q' + m.to" class="item"><router-link :to="m.to" :class="{ active: isActive(m) }">{{ m.label }}</router-link></div>
+            <div class="tiny faint" style="padding:2px 10px 6px">{{ frequent.length ? '자주 여는 화면입니다. ' : '' }}메뉴 오른쪽 ☆를 누르면 여기 고정됩니다</div>
+          </template>
           <div v-for="(m, i) in favItems" :key="'f' + m.to" class="item">
             <router-link :to="m.to" :class="{ active: isActive(m), live: m.admin }">{{ m.label }}</router-link>
             <span class="tools" @click.stop.prevent>
@@ -21,8 +24,8 @@
           </div>
         </div>
         <div v-for="g in menu" :key="g.title" class="group">
-          <div class="gt">{{ g.title }}</div>
-          <div v-for="m in g.items.filter(x => !x.admin || session.user?.is_admin)" :key="m.to" class="item">
+          <button class="gt fold" :aria-expanded="isOpen(g)" @click.stop="toggleGroup(g)"><span>{{ g.title }}</span><span class="arrow">{{ isOpen(g) ? '▾' : '▸' }}</span></button>
+          <div v-for="m in isOpen(g) ? g.items.filter(x => !x.admin || session.user?.is_admin) : []" :key="m.to" class="item">
             <router-link :to="m.to" :class="{ active: isActive(m), live: m.admin }">{{ m.label }}</router-link>
             <button class="ghost tiny star" :class="{ on: favs.includes(m.to) }" :title="favs.includes(m.to) ? '내 메뉴에서 빼기' : '내 메뉴에 담기'" @click.stop.prevent="toggleFav(m.to)">{{ favs.includes(m.to) ? '★' : '☆' }}</button>
           </div>
@@ -50,7 +53,10 @@
           <router-link to="/settings" class="btn ghost small ellipsis" style="max-width:110px;display:inline-block" :title="session.user?.nickname + ' 설정'">{{ session.user?.nickname }}</router-link>
         </div>
       </header>
-      <main class="content"><router-view :key="route.path" /></main>
+      <main class="content">
+        <div v-if="tabs" class="tabs page-tabs"><router-link v-for="t in tabs" :key="t.to" :to="t.to" :class="{ on: isActive(t) }">{{ t.label }}</router-link></div>
+        <router-view :key="route.path" />
+      </main>
     </div>
     <div v-if="navOpen" class="nav-back" @click="navOpen = false" />
   </div>
@@ -64,6 +70,7 @@ import SymbolSearch from './components/SymbolSearch.vue'
 import { api, session, toasts } from './lib/api'
 import { ago } from './lib/fmt'
 import { useInterval } from './lib/poll'
+import { stored } from './lib/prefs'
 
 const route = useRoute()
 const router = useRouter()
@@ -76,9 +83,14 @@ const notif = reactive({ unread: 0, items: [] })
 const AREAS = [
   { key: 'stock', label: '주식·코인', groups: [
     { title: '내 종목', items: [{ to: '/watchlist', label: '관심종목' }, { to: '/alerts', label: '알림' }] },
-    { title: '시장 보기', items: [{ to: '/', label: '시장요약' }, { to: '/market/briefing', label: '아침 브리핑' }, { to: '/market/flow', label: '투자자 수급' }, { to: '/market/flow-detail', label: '프로그램·업종·공매도' }, { to: '/market/risk', label: '위험·심리 지표' },
-      { to: '/market/movers', label: '특징종목' }, { to: '/market/rs', label: '상대강도 순위' }, { to: '/market/indicators', label: '지수·환율·원자재' },
-      { to: '/market/news', label: '시장 뉴스' }, { to: '/market/disclosures', label: '공시 속보' }, { to: '/market/earnings', label: '미국 실적 일정' }, { to: '/market/groups/theme', label: '테마·업종', prefix: '/market/groups' }, { to: '/market/list', label: '전체 종목' }] },
+    { title: '시장 보기', items: [
+      { to: '/', label: '시장요약', tabs: [{ to: '/', label: '요약' }, { to: '/market/briefing', label: '아침 브리핑' }] },
+      { to: '/market/flow', label: '수급', tabs: [{ to: '/market/flow', label: '투자자 수급' }, { to: '/market/program', label: '프로그램·업종' }, { to: '/market/short', label: '공매도·장중 가집계' }] },
+      { to: '/market/risk', label: '위험·심리 지표' },
+      { to: '/market/movers', label: '종목 순위', tabs: [{ to: '/market/movers', label: '특징종목' }, { to: '/market/rs', label: '상대강도' },
+        { to: '/market/groups/theme', label: '테마·업종', prefix: '/market/groups' }, { to: '/market/list', label: '전체 종목' }] },
+      { to: '/market/indicators', label: '지수·환율·원자재' },
+      { to: '/market/news', label: '뉴스·일정', tabs: [{ to: '/market/news', label: '시장 뉴스' }, { to: '/market/disclosures', label: '공시 속보' }, { to: '/market/earnings', label: '미국 실적 일정' }] }] },
     { title: '종목 찾기·검증', items: [{ to: '/discover/screener', label: '종목필터' }, { to: '/discover/signals', label: '매매신호' }, { to: '/discover/backtest', label: '백테스팅' },
       { to: '/discover/similar', label: '유사차트' }, { to: '/discover/ai', label: 'AI예측 (참고)' }] },
     { title: '모의투자', items: [{ to: '/trade/order', label: '모의 주문' }, { to: '/trade/status', label: '투자현황' }, { to: '/trade/journal', label: '매매일지' },
@@ -100,12 +112,25 @@ const menu = computed(() => AREAS.find(a => a.key === area.value).groups)
 function switchArea(k) { area.value = k; router.push(k === 'vc' ? '/vc' : '/'); navOpen.value = false }
 const favs = ref([])
 const allItems = computed(() => AREAS.flatMap(a => a.groups).flatMap(g => g.items).filter(x => !x.admin || session.user?.is_admin))
-const favItems = computed(() => favs.value.map(to => allItems.value.find(m => m.to === to)).filter(Boolean))
+const favItems = computed(() => favs.value.map(to => allItems.value.find(m => m.to === to) || allItems.value.flatMap(m => m.tabs || []).find(t => t.to === to)).filter(Boolean))
 watch(() => session.user?.id, id => { favs.value = []; if (id) api.get('/user/menu', null, { quiet: true }).then(r => (favs.value = r)).catch(() => {}) }, { immediate: true })
 function saveFavs() { api.put('/user/menu', favs.value, { quiet: true }).catch(() => {}) }
 function toggleFav(to) { favs.value = favs.value.includes(to) ? favs.value.filter(x => x !== to) : [...favs.value, to]; saveFavs() }
-function moveFav(i, d) { const a = [...favs.value.filter(to => allItems.value.some(m => m.to === to))]; [a[i], a[i + d]] = [a[i + d], a[i]]; favs.value = a; saveFavs() }
-function isActive(m) { return m.prefix ? route.path.startsWith(m.prefix) : route.path === m.to }
+function moveFav(i, d) { const a = favItems.value.map(m => m.to); [a[i], a[i + d]] = [a[i + d], a[i]]; favs.value = a; saveFavs() }
+// 탭으로 묶인 메뉴는 안에 든 화면 어느 것이 열려 있어도 켜진 것으로 본다
+function isActive(m) { return m.tabs ? m.tabs.some(isActive) : m.prefix ? route.path.startsWith(m.prefix) : route.path === m.to }
+const current = computed(() => allItems.value.find(isActive))
+const tabs = computed(() => current.value?.tabs)
+
+// 덜 쓰는 묶음은 접어 둔다. 지금 보고 있는 화면이 든 묶음은 늘 펼친다.
+const folded = stored('pref.menuFolded', { '연습·커뮤니티': true })
+function isOpen(g) { return !folded.value[g.title] || g.items.some(isActive) }
+function toggleGroup(g) { folded.value = { ...folded.value, [g.title]: isOpen(g) } }
+
+// ☆로 고른 메뉴가 없으면 자주 연 화면 네 개를 대신 보여 준다
+const visits = stored('pref.menuVisits', {})
+watch(() => current.value?.to, to => { if (to) visits.value = { ...visits.value, [to]: (visits.value[to] || 0) + 1 } }, { immediate: true })
+const frequent = computed(() => allItems.value.filter(m => (visits.value[m.to] || 0) >= 3).sort((a, b) => visits.value[b.to] - visits.value[a.to]).slice(0, 4))
 
 async function loadNotif() { try { Object.assign(notif, await api.get('/notifications', null, { quiet: true })) } catch { /* 무시 */ } }
 watch(() => session.user?.id, id => { if (id) loadNotif() }, { immediate: true })
@@ -130,6 +155,9 @@ function toggleTheme() {
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 16px; padding: 4px 8px 12px; }
 .group { margin-bottom: 8px; }
 .gt { font-size: 11px; color: var(--faint); font-weight: 700; padding: 6px 8px 2px; }
+button.gt.fold { display: flex; justify-content: space-between; align-items: center; width: 100%; border: 0; background: none; border-radius: 6px; cursor: pointer; }
+button.gt.fold:hover { color: var(--text); background: none; }
+.page-tabs { margin-bottom: 14px; } .page-tabs a { white-space: nowrap; }
 .nav a:not(.brand) { display: block; flex: 1; min-width: 0; padding: 6px 10px; border-radius: 7px; color: var(--muted); font-weight: 500; }
 .item { display: flex; align-items: center; gap: 2px; }
 .item .star, .item .tools button { padding: 2px 5px; font-size: 12px; color: var(--faint); visibility: hidden; border: 0; }

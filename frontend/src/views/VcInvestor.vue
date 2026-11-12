@@ -22,7 +22,7 @@
       </div>
     </div>
   </div>
-  <div v-else class="spinner" />
+  <Loading v-else />
 </template>
 <script setup>
 import { ref } from 'vue'

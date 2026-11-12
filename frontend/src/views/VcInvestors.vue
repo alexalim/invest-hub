@@ -6,7 +6,7 @@
       <select aria-label="투자자 유형" v-model="f.type_"><option value="">모든 유형</option><option v-for="t in meta?.investor_types || []" :key="t">{{ t }}</option></select>
       <select aria-label="정렬" v-model="f.sort"><option value="deals">투자 건수순</option><option value="amount">참여 금액순</option><option value="recent">최근 투자순</option><option value="name">이름순</option></select>
     </div></div>
-    <div class="card flush"><div v-if="!d" class="spinner" style="margin:16px" />
+    <div class="card flush"><Loading v-if="!d" />
       <div v-else class="scroll-x"><table class="t"><thead><tr><th>투자자</th><th>유형</th><th class="num">투자 건수</th><th class="num">참여 라운드 금액</th><th>최근 포트폴리오</th><th>최근 투자</th></tr></thead>
         <tbody><tr v-for="r in d.rows" :key="r.id" class="click" @click="$router.push('/vc/investors/' + r.id)">
           <td><b>{{ r.name }}</b></td><td class="small">{{ r.type }}</td><td class="num">{{ r.deal_count }}</td><td class="num">{{ won(r.total_amount) }}</td>

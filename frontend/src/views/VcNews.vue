@@ -6,7 +6,7 @@
       <div class="seg"><button v-for="k in KINDS" :key="k[0]" :class="{ on: f.kind === k[0] }" @click="f.kind = k[0]">{{ k[1] }}</button></div>
       <div class="seg"><button v-for="s in SENTS" :key="s[0]" :class="{ on: f.sentiment === s[0] }" @click="f.sentiment = s[0]">{{ s[1] }}</button></div>
     </div></div>
-    <div class="card"><div v-if="!d" class="spinner" />
+    <div class="card"><Loading v-if="!d" />
       <div v-for="n in d?.rows || []" :key="n.id" class="list-item">
         <div class="row wrap"><span class="chip">{{ KL[n.kind] }}</span><span class="chip" :class="n.sentiment === 'positive' ? 'red' : n.sentiment === 'negative' ? 'bluedown' : ''">{{ SL[n.sentiment] }}</span>
           <a :href="n.url" target="_blank" rel="noopener" style="font-weight:600">{{ n.title }}</a></div>
