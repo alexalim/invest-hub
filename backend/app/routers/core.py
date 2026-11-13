@@ -11,6 +11,12 @@ router = APIRouter(prefix="/api")
 SECRET_KEYS = ("dart_key", "data_go_kr_key")
 
 
+def _set_session(request: Request, response: Response, user_id: int):
+    # 터널·프록시를 거쳐 https 로 들어온 접속이면 쿠키가 https 로만 실리게 한다 (집 안 http 접속은 그대로)
+    https = request.headers.get("x-forwarded-proto", "").split(",")[0].strip() == "https"
+    response.set_cookie(auth.COOKIE, auth.create_session(user_id), httponly=True, samesite="lax", secure=https, max_age=90 * 86400)
+
+
 @router.get("/auth/me")
 def me(request: Request):
     first = db.val("SELECT COUNT(*) FROM users") == 0
@@ -21,16 +27,16 @@ def me(request: Request):
 
 
 @router.post("/auth/register")
-def register(response: Response, p: dict = Body(...)):
+def register(request: Request, response: Response, p: dict = Body(...)):
     u = auth.register(p.get("username", ""), p.get("password", ""), p.get("nickname", ""), p.get("invite"))
-    response.set_cookie(auth.COOKIE, auth.create_session(u["id"]), httponly=True, samesite="lax", max_age=90 * 86400)
+    _set_session(request, response, u["id"])
     return u
 
 
 @router.post("/auth/login")
 def login(request: Request, response: Response, p: dict = Body(...)):
     u = auth.login(str(p.get("username", "")), str(p.get("password", "")), request.client.host if request.client else "")
-    response.set_cookie(auth.COOKIE, auth.create_session(u["id"]), httponly=True, samesite="lax", max_age=90 * 86400)
+    _set_session(request, response, u["id"])
     return dict(id=u["id"], username=u["username"], nickname=u["nickname"], is_admin=u["is_admin"])
 
 

@@ -50,6 +50,7 @@
             </div>
           </div>
           <button class="ghost" @click="toggleTheme" :aria-label="'테마 전환'">{{ dark ? '☀️' : '🌙' }}</button>
+          <span v-if="session.user?.is_admin" class="chip red" title="실계좌·사용자 초대·수집 작업을 다룰 수 있는 계정입니다">관리자</span>
           <router-link to="/settings" class="btn ghost small ellipsis" style="max-width:110px;display:inline-block" :title="session.user?.nickname + ' 설정'">{{ session.user?.nickname }}</router-link>
         </div>
       </header>
@@ -94,6 +95,7 @@ const AREAS = [
     { title: '종목 찾기·검증', items: [{ to: '/discover/screener', label: '종목필터' }, { to: '/discover/signals', label: '매매신호' }, { to: '/discover/backtest', label: '백테스팅' },
       { to: '/discover/similar', label: '유사차트' }, { to: '/discover/ai', label: 'AI예측 (참고)' }] },
     { title: '모의투자', items: [{ to: '/trade/order', label: '모의 주문' }, { to: '/trade/status', label: '투자현황' }, { to: '/trade/journal', label: '매매일지' },
+      { to: '/trade/mind', label: '심법', tabs: [{ to: '/trade/mind', label: '투자 격언' }, { to: '/trade/mind/moktak', label: '마음 목탁' }, { to: '/trade/mind/bell', label: '말씀 종' }] },
       { to: '/trade/live', label: '실계좌 (관리자)', admin: true }] },
     { title: '연습·커뮤니티', items: [{ to: '/trade/game', label: '차트게임' }, { to: '/trade/league', label: '투자리그' }, { to: '/community/timeline', label: '타임라인' },
       { to: '/community/insight', label: '인사이트' }, { to: '/community/predict', label: '종목예측' }] },
