@@ -8,6 +8,7 @@ from fastapi import Depends, HTTPException, Request
 from . import db
 
 COOKIE = "hub_session"
+SESSION_DAYS = 90                     # 쿠키 수명과 같게. 이보다 오래된 세션은 서버에서도 받지 않는다
 
 
 def hash_pw(pw: str, salt: bytes | None = None) -> str:
@@ -35,14 +36,15 @@ def setup_code() -> str:
 
 def create_session(user_id: int) -> str:
     token = secrets.token_urlsafe(32)
+    db.ex("DELETE FROM sessions WHERE created_at < ?", (db.now() - SESSION_DAYS * 86400,))
     db.ex("INSERT INTO sessions(token,user_id,created_at) VALUES(?,?,?)", (token, user_id, db.now()))
     return token
 
 
 def current_user(request: Request) -> dict:
     token = request.cookies.get(COOKIE)
-    user = db.one("SELECT u.id,u.username,u.nickname,u.is_admin FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token=?",
-                  (token,)) if token else None
+    user = db.one("SELECT u.id,u.username,u.nickname,u.is_admin FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token=? AND s.created_at >= ?",
+                  (token, db.now() - SESSION_DAYS * 86400)) if token else None
     if not user:
         raise HTTPException(401, "로그인이 필요합니다")
     return user
@@ -86,6 +88,7 @@ def register(username: str, password: str, nickname: str, invite: str | None) ->
 _FAILS: dict[str, list[float]] = {}   # 아이디·접속 주소별 최근 실패 시각 (서버 메모리)
 MAX_FAILS, FAIL_WINDOW = 8, 600
 MAX_TRACKED = 5000                    # 이보다 많아지면 기한 지난 기록을 정리한다
+_DUMMY_HASH = hash_pw(secrets.token_hex(16))
 
 
 def login(username: str, password: str, ip: str = "") -> dict:
@@ -103,7 +106,8 @@ def login(username: str, password: str, ip: str = "") -> dict:
             # 짧은 시간에 수많은 아이디로 실패가 쏟아지는 중 → 잠금을 풀지 않고 잠시 모든 시도를 막는다
             raise HTTPException(429, "로그인 시도가 너무 많습니다. 잠시 뒤에 다시 해 주세요")
     u = db.one("SELECT * FROM users WHERE username=?", (username.strip().lower(),))
-    if not u or not check_pw(password, u["pw_hash"]):
+    # 없는 아이디도 같은 해시 계산을 거쳐, 응답 시간으로 가입 여부를 알 수 없게 한다
+    if not check_pw(password, u["pw_hash"] if u else _DUMMY_HASH) or not u:
         _FAILS[key] = recent + [now]
         raise HTTPException(401, "아이디 또는 비밀번호가 올바르지 않습니다")
     _FAILS.pop(key, None)

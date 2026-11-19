@@ -33,6 +33,17 @@ for r in (core, market, stock, discover, trade, community, user, vc, live, pulse
     app.include_router(r.router)
 
 
+@app.exception_handler(TypeError)
+@app.exception_handler(ValueError)
+@app.exception_handler(AttributeError)
+async def bad_input(request: Request, exc: Exception):
+    # 보낸 값의 형식이 틀려 생긴 오류(예: 아이디 자리에 숫자)는 400으로 알린다. 원인 추적용으로 로그는 남긴다
+    if request.method in ("POST", "PUT", "PATCH"):
+        logging.getLogger("app").warning("bad input on %s: %s", request.url.path, type(exc).__name__)
+        return JSONResponse({"detail": "입력값 형식을 확인해 주세요"}, status_code=400)
+    return await unhandled(request, exc)
+
+
 @app.exception_handler(Exception)
 async def unhandled(request: Request, exc: Exception):
     # 내부 오류 내용은 로그에만 남기고 화면에는 일반 문구만 보낸다
