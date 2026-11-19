@@ -1,6 +1,7 @@
 """모의투자 엔진. 계좌 현금은 원화로 관리하고, 미국 종목은 체결 시점 환율로 환산한다.
 시장가는 현재가로 즉시 체결, 지정가는 현재가가 지정가에 닿으면 체결한다."""
 import logging
+import math
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -103,6 +104,17 @@ def _fill(order: dict, price: float, fx: float):
     return True
 
 
+def _number(v, message: str) -> float:
+    """주문 수량·가격을 숫자로 바꾼다. NaN·무한대·숫자 아닌 값은 400 (NaN이 저장되면 계좌·리그 계산이 깨진다)."""
+    try:
+        n = float(v)
+    except (TypeError, ValueError):
+        raise HTTPException(400, message)
+    if not math.isfinite(n):
+        raise HTTPException(400, message)
+    return n
+
+
 async def place(user: dict, account_id: int, symbol: str, side: str, otype: str, qty: float, price: float | None) -> dict:
     acc = account_of(user, account_id)
     p = symbol.split(":")[0]
@@ -110,7 +122,7 @@ async def place(user: dict, account_id: int, symbol: str, side: str, otype: str,
         raise HTTPException(400, "주문할 수 없는 종목입니다")
     if side not in ("buy", "sell") or otype not in ("market", "limit"):
         raise HTTPException(400, "주문 유형이 올바르지 않습니다")
-    qty = float(qty)
+    qty = _number(qty, "수량을 확인해 주세요")
     if p != "CR":
         qty = float(int(qty))
     if qty <= 0:
@@ -127,9 +139,9 @@ async def place(user: dict, account_id: int, symbol: str, side: str, otype: str,
             raise HTTPException(400, "지금은 장 운영 시간이 아닙니다. 지정가 주문은 접수할 수 있습니다")
         price = last
     else:
-        if not price or price <= 0:
+        price = _number(price, "지정가를 입력해 주세요") if price not in (None, "") else 0.0
+        if price <= 0:
             raise HTTPException(400, "지정가를 입력해 주세요")
-        price = float(price)
     if side == "buy":
         if p == "CR" and price * qty < MIN_COIN_ORDER:
             raise HTTPException(400, f"코인은 {MIN_COIN_ORDER:,}원 이상부터 주문할 수 있습니다")

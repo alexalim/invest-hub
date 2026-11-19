@@ -55,7 +55,8 @@ def admin_user(user: dict = Depends(current_user)) -> dict:
 
 
 def register(username: str, password: str, nickname: str, invite: str | None) -> dict:
-    username = username.strip()
+    # 아이디(주로 이메일)는 대소문자를 구분하지 않도록 소문자로 저장한다. 로그인도 소문자로 찾는다
+    username = username.strip().lower()
     if len(username) < 2 or len(password) < 6:
         raise HTTPException(400, "아이디는 2자 이상, 비밀번호는 6자 이상이어야 합니다")
     first = db.val("SELECT COUNT(*) FROM users") == 0
@@ -84,6 +85,7 @@ def register(username: str, password: str, nickname: str, invite: str | None) ->
 
 _FAILS: dict[str, list[float]] = {}   # 아이디·접속 주소별 최근 실패 시각 (서버 메모리)
 MAX_FAILS, FAIL_WINDOW = 8, 600
+MAX_TRACKED = 5000                    # 이보다 많아지면 기한 지난 기록을 정리한다
 
 
 def login(username: str, password: str, ip: str = "") -> dict:
@@ -93,11 +95,16 @@ def login(username: str, password: str, ip: str = "") -> dict:
     recent = [t for t in _FAILS.get(key, []) if now - t < FAIL_WINDOW]
     if len(recent) >= MAX_FAILS:
         raise HTTPException(429, "로그인 시도가 너무 많습니다. 10분 뒤에 다시 해 주세요")
-    u = db.one("SELECT * FROM users WHERE username=?", (username.strip(),))
+    if len(_FAILS) > MAX_TRACKED:
+        # 기한 지난 기록만 지운다. 통째로 비우면 남의 아이디 잠금까지 풀린다
+        for k in [k for k, ts in _FAILS.items() if not ts or now - ts[-1] >= FAIL_WINDOW]:
+            del _FAILS[k]
+        if len(_FAILS) > MAX_TRACKED:
+            # 짧은 시간에 수많은 아이디로 실패가 쏟아지는 중 → 잠금을 풀지 않고 잠시 모든 시도를 막는다
+            raise HTTPException(429, "로그인 시도가 너무 많습니다. 잠시 뒤에 다시 해 주세요")
+    u = db.one("SELECT * FROM users WHERE username=?", (username.strip().lower(),))
     if not u or not check_pw(password, u["pw_hash"]):
         _FAILS[key] = recent + [now]
-        if len(_FAILS) > 5000:
-            _FAILS.clear()
         raise HTTPException(401, "아이디 또는 비밀번호가 올바르지 않습니다")
     _FAILS.pop(key, None)
     return u

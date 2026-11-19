@@ -14,6 +14,12 @@ from ..providers import http
 from .extract import norm_name
 
 log = logging.getLogger("vc.enrich")
+
+
+def _safe_error(e: Exception) -> str:
+    """외부 호출 오류를 키 없이 짧게 적는다: 응답 코드가 있으면 코드만, 아니면 예외 종류만."""
+    code = getattr(getattr(e, "response", None), "status_code", None)
+    return f"HTTP {code}" if code is not None else type(e).__name__
 DART = "https://opendart.fss.or.kr/api"
 GO = "https://apis.data.go.kr"
 ACCOUNTS = {
@@ -202,8 +208,9 @@ async def enrich(company_id: int) -> dict:
         try:
             await fn(db.one("SELECT * FROM companies WHERE id=?", (company_id,)), out)
         except Exception as e:
-            out.append(f"{fn.__name__.strip('_').upper()} 오류: {e!r}"[:200])
-            log.warning("enrich %s %s: %r", company_id, fn.__name__, e)
+            # 키가 주소(crtfc_key·serviceKey)에 실려 가므로, 주소가 담긴 예외 원문은 화면에도 로그에도 남기지 않는다
+            out.append(f"{fn.__name__.strip('_').upper()} 오류: {_safe_error(e)}")
+            log.warning("enrich %s %s: %s", company_id, fn.__name__, _safe_error(e))
     db.ex("UPDATE companies SET enriched_at=? WHERE id=?", (db.now(), company_id))
     return dict(ok=True, log=out)
 
